@@ -4,10 +4,10 @@ namespace TrafficLight.Core;
 
 public class RoadLine : IRoadLine
 {
+    private Dictionary<int, IVehicle> _asyncTasks = new();
     private int _position = 0;
-    private SemaphoreSlim _semaphore = new SemaphoreSlim(1);
-    private Dictionary<int, IVehicle> _task = new Dictionary<int, IVehicle>();
-    private Dictionary<int, IVehicle> _asyncTasks = new Dictionary<int, IVehicle>();
+    private SemaphoreSlim _semaphore = new(1);
+    private Dictionary<int, IVehicle> _task = new();
 
     /// <inheritdoc />
     public Task<TV> AddTask<T, TV>(int position, T parameter, Func<T, TV> callback)
@@ -18,6 +18,33 @@ public class RoadLine : IRoadLine
         AddTaskToQueue(position, parameter, tcs, callback);
         CheckAndRunPosition();
         return tcs.Task;
+    }
+
+    /// <inheritdoc />
+    public Task<TV> AddTaskAsync<T, TV>(int position, T parameter, Func<T, Task<TV>> callback)
+    {
+        if (position < 0)
+            throw new NegativePositionException("Position cannot be negative");
+        var tcs = new TaskCompletionSource<TV>();
+        AddAsyncTaskToQueue(position, parameter, tcs, callback);
+        CheckAndRunPosition();
+        return tcs.Task;
+    }
+
+    /// <inheritdoc />
+    public void Clear()
+    {
+        _semaphore.Wait();
+        try
+        {
+            _position = 0;
+            _task.Clear();
+            _asyncTasks.Clear();
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     private void CheckAndRunPosition()
@@ -53,7 +80,7 @@ public class RoadLine : IRoadLine
     private void AddTaskToQueue<T, TV>(int position, T parameter,
         TaskCompletionSource<TV> tcs, Func<T, TV> callback)
     {
-        var Vehicle = new Vehicle<T, TV>
+        var vehicle = new Vehicle<T, TV>
         {
             Parameter = parameter,
             TaskCompletionSource = tcs,
@@ -62,7 +89,7 @@ public class RoadLine : IRoadLine
         _semaphore.Wait();
         try
         {
-            _task.Add(position, Vehicle);
+            _task.Add(position, vehicle);
         }
         catch (ArgumentException)
         {
@@ -72,23 +99,12 @@ public class RoadLine : IRoadLine
         {
             _semaphore.Release();
         }
-    }
-
-    /// <inheritdoc />
-    public Task<TV> AddTaskAsync<T, TV>(int position, T parameter, Func<T, Task<TV>> callback)
-    {
-        if (position < 0)
-            throw new NegativePositionException("Position cannot be negative");
-        var tcs = new TaskCompletionSource<TV>();
-        AddAsyncTaskToQueue(position, parameter, tcs, callback);
-        CheckAndRunPosition();
-        return tcs.Task;
     }
 
     private void AddAsyncTaskToQueue<T, TV>(int position, T parameter, TaskCompletionSource<TV> tcs,
         Func<T, Task<TV>> callback)
     {
-        var Vehicle = new AsyncVehicle<T, TV>
+        var vehicle = new AsyncVehicle<T, TV>
         {
             Parameter = parameter,
             TaskCompletionSource = tcs,
@@ -97,27 +113,11 @@ public class RoadLine : IRoadLine
         _semaphore.Wait();
         try
         {
-            _asyncTasks.Add(position, Vehicle);
+            _asyncTasks.Add(position, vehicle);
         }
         catch (ArgumentException)
         {
             throw new PositionLineException($"this position {position} is already occupied");
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
-    }
-
-    /// <inheritdoc />
-    public void Clear()
-    {
-        _semaphore.Wait();
-        try
-        {
-            _position = 0;
-            _task.Clear();
-            _asyncTasks.Clear();
         }
         finally
         {
