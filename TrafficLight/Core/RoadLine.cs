@@ -12,6 +12,8 @@ public class RoadLine : IRoadLine
     /// <inheritdoc />
     public Task<TV> AddTask<T, TV>(int position, T parameter, Func<T, TV> callback)
     {
+        if (position < 0)
+            throw new NegativePositionException("Position cannot be negative");
         var tcs = new TaskCompletionSource<TV>();
         AddTaskToQueue(position, parameter, tcs, callback);
         CheckAndRunPosition();
@@ -42,9 +44,9 @@ public class RoadLine : IRoadLine
         }
     }
 
-    private void RunVehicle(Dictionary<int, IVehicle> dictionary, int position)
+    private void RunVehicle(IReadOnlyDictionary<int, IVehicle> dictionary, int position)
     {
-        var vehicle = _task[position];
+        var vehicle = dictionary[position];
         vehicle.Run();
     }
 
@@ -75,6 +77,8 @@ public class RoadLine : IRoadLine
     /// <inheritdoc />
     public Task<TV> AddTaskAsync<T, TV>(int position, T parameter, Func<T, Task<TV>> callback)
     {
+        if (position < 0)
+            throw new NegativePositionException("Position cannot be negative");
         var tcs = new TaskCompletionSource<TV>();
         AddAsyncTaskToQueue(position, parameter, tcs, callback);
         CheckAndRunPosition();
