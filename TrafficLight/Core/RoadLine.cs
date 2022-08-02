@@ -1,3 +1,5 @@
+using TrafficLight.Exceptions;
+
 namespace TrafficLight.Core;
 
 public class RoadLine : IRoadLine
@@ -12,24 +14,24 @@ public class RoadLine : IRoadLine
     {
         var tcs = new TaskCompletionSource<TV>();
         AddTaskToQueue(position, parameter, tcs, callback);
-        CheckAndRunPosition(position);
+        CheckAndRunPosition();
         return tcs.Task;
     }
 
-    private void CheckAndRunPosition(int position)
+    private void CheckAndRunPosition()
     {
         _semaphore.Wait();
         try
         {
-            if (_task.ContainsKey(position))
+            if (_task.ContainsKey(_position))
             {
-                RunVehicle(_task, position);
+                RunVehicle(_task, _position);
             }
             else
             {
-                if (_asyncTasks.ContainsKey(position))
+                if (_asyncTasks.ContainsKey(_position))
                 {
-                    RunVehicle(_asyncTasks, position);
+                    RunVehicle(_asyncTasks, _position);
                 }
             }
         }
@@ -60,6 +62,10 @@ public class RoadLine : IRoadLine
         {
             _task.Add(position, Vehicle);
         }
+        catch (ArgumentException)
+        {
+            throw new PositionLineException($"this position {position} is already occupied");
+        }
         finally
         {
             _semaphore.Release();
@@ -71,7 +77,7 @@ public class RoadLine : IRoadLine
     {
         var tcs = new TaskCompletionSource<TV>();
         AddAsyncTaskToQueue(position, parameter, tcs, callback);
-        CheckAndRunPosition(position);
+        CheckAndRunPosition();
         return tcs.Task;
     }
 
@@ -88,6 +94,10 @@ public class RoadLine : IRoadLine
         try
         {
             _asyncTasks.Add(position, Vehicle);
+        }
+        catch (ArgumentException)
+        {
+            throw new PositionLineException($"this position {position} is already occupied");
         }
         finally
         {
