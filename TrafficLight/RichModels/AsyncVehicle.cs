@@ -7,6 +7,9 @@ public class AsyncVehicle<T, TV>:IVehicle
     public Func<T, Task<TV>> Callback { get; init; }
 
     /// <inheritdoc />
+    public bool IsAsynchronous => true;
+
+    /// <inheritdoc />
     public void Run()
     {
         Callback(Parameter).ContinueWith(task =>

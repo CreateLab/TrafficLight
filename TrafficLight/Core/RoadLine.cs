@@ -4,10 +4,10 @@ namespace TrafficLight.Core;
 
 public class RoadLine : IRoadLine
 {
-    private Dictionary<int, IVehicle> _asyncTasks = new();
+    
     private int _position = 0;
     private SemaphoreSlim _semaphore = new(1);
-    private Dictionary<int, IVehicle> _task = new();
+    private Dictionary<int, IVehicle> _road = new();
 
     /// <inheritdoc />
     public Task<TV> AddTask<T, TV>(int position, T parameter, Func<T, TV> callback)
@@ -38,8 +38,7 @@ public class RoadLine : IRoadLine
         try
         {
             _position = 0;
-            _task.Clear();
-            _asyncTasks.Clear();
+            _road.Clear();
         }
         finally
         {
@@ -52,28 +51,30 @@ public class RoadLine : IRoadLine
         _semaphore.Wait();
         try
         {
-            if (_task.ContainsKey(_position))
+            if (_road.ContainsKey(_position))
             {
-                RunVehicle(_task, _position);
-            }
-            else
-            {
-                if (_asyncTasks.ContainsKey(_position))
-                {
-                    RunVehicle(_asyncTasks, _position);
-                }
+                RunVehicle(_position);
+                ClearVehicleFromRoad( _position);
+                _position++;
+                _semaphore.Release();
+                CheckAndRunPosition();
             }
         }
         finally
         {
-            _position++;
+           
             _semaphore.Release();
         }
     }
 
-    private void RunVehicle(IReadOnlyDictionary<int, IVehicle> dictionary, int position)
+    private void ClearVehicleFromRoad(int position)
     {
-        var vehicle = dictionary[position];
+        _road.Remove(position);
+    }
+
+    private void RunVehicle(int position)
+    {
+        var vehicle = _road[position];
         vehicle.Run();
     }
 
@@ -89,7 +90,7 @@ public class RoadLine : IRoadLine
         _semaphore.Wait();
         try
         {
-            _task.Add(position, vehicle);
+            _road.Add(position, vehicle);
         }
         catch (ArgumentException)
         {
@@ -113,7 +114,7 @@ public class RoadLine : IRoadLine
         _semaphore.Wait();
         try
         {
-            _asyncTasks.Add(position, vehicle);
+            _road.Add(position, vehicle);
         }
         catch (ArgumentException)
         {

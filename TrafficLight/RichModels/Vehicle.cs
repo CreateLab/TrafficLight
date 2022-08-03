@@ -7,6 +7,9 @@ public class Vehicle<T, TV>:IVehicle
     public Func<T, TV> Callback { get; init; }
 
     /// <inheritdoc />
+    public bool IsAsynchronous => false;
+
+    /// <inheritdoc />
     public void Run()
     {
         var result = Callback(Parameter);
