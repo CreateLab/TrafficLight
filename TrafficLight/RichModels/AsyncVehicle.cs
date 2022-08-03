@@ -12,7 +12,7 @@ public class AsyncVehicle<T, TV>:IVehicle
     /// <inheritdoc />
     public void Run()
     {
-        Callback(Parameter).ContinueWith(task =>
+        /*Callback(Parameter).ContinueWith(task =>
         {
             if (task.IsFaulted)
             {
@@ -22,6 +22,9 @@ public class AsyncVehicle<T, TV>:IVehicle
             {
                 TaskCompletionSource.TrySetResult(task.Result);
             }
-        });
+        });*/
+
+        var result = Callback(Parameter).Result;
+        TaskCompletionSource.TrySetResult(result);
     }
 }
