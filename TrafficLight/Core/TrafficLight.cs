@@ -1,10 +1,10 @@
 ﻿namespace TrafficLight.Core;
 
-public class TrafficLight:ITrafficLight
+public class TrafficLight : ITrafficLight
 {
-    private Dictionary<string, RoadLine> _roadLines;
+    private Dictionary<string, RoadLine> _roadLines = new();
 
-  
+
     /// <inheritdoc />
     public IRoadLine GetRoadLine(string roadLineName)
     {
@@ -12,7 +12,7 @@ public class TrafficLight:ITrafficLight
         {
             _roadLines.Add(roadLineName, new RoadLine());
         }
-        
+
         return _roadLines[roadLineName];
     }
 }
