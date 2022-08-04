@@ -3,14 +3,18 @@
 public class TrafficLight : ITrafficLight
 {
     private Dictionary<string, RoadLine> _roadLines = new();
-
+    private static readonly object _lock = new();
 
     /// <inheritdoc />
     public IRoadLine GetRoadLine(string roadLineName)
     {
-        if (!_roadLines.ContainsKey(roadLineName))
+        lock (_lock)
         {
-            _roadLines.Add(roadLineName, new RoadLine());
+            if (!_roadLines.ContainsKey(roadLineName))
+            {
+
+                _roadLines.Add(roadLineName, new RoadLine());
+            }
         }
 
         return _roadLines[roadLineName];

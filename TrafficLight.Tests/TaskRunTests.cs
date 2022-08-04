@@ -26,19 +26,19 @@ public class TaskRunTests
         {
             queue.Enqueue(x.ToString());
             return x;
-        });
+        }, false);
 
         var addTask1 = roadLine.AddTask(b, b, x =>
         {
             queue.Enqueue(x.ToString());
             return x;
-        });
+        }, false);
 
         var addTask0 = roadLine.AddTask(c, c, x =>
         {
             queue.Enqueue(x.ToString());
             return x;
-        });
+        }, false);
 
         tasks.Add(addTask0);
         tasks.Add(addTask1);
@@ -70,13 +70,13 @@ public class TaskRunTests
             {
                 queue.Enqueue(x.ToString());
                 return x;
-            });
+            }, false);
 
             var addTask1 = roadLine.AddTask(1, 1, x =>
             {
                 queue.Enqueue(x.ToString());
                 return x;
-            });
+            }, false);
 
 
             tasks.Add(addTask1);
@@ -112,7 +112,7 @@ public class TaskRunTests
             {
                 queue.Enqueue(x.ToString());
                 return x;
-            });
+            }, false);
 
 
             tasks.Add(addTask2);

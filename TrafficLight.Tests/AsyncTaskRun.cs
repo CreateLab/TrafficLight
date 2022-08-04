@@ -179,7 +179,6 @@ public class AsyncTaskRun
     }
 
 
-    
     [Theory]
     [InlineData(0, 1, 2)]
     [InlineData(2, 1, 0)]
@@ -220,7 +219,7 @@ public class AsyncTaskRun
         tasks.Add(addTask2);
 
         await Task.WhenAll(tasks);
-        
+
         // Assert
 
         Assert.Equal(3, queue.Count);

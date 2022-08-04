@@ -10,6 +10,9 @@ public class Vehicle<T, TV>:IVehicle
     public bool IsAsynchronous => false;
 
     /// <inheritdoc />
+    public bool NeedClear { get; init; }
+
+    /// <inheritdoc />
     public void Run()
     {
         var result = Callback(Parameter);

@@ -7,7 +7,7 @@ public static class DIExtension
 {
     public static IServiceCollection AddTrafficLight(this IServiceCollection services)
     {
-        services.AddTransient<ITrafficLight, Core.TrafficLight>();
+        services.AddSingleton<ITrafficLight, Core.TrafficLight>();
         return services;
     }
 }

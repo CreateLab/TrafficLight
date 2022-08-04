@@ -6,6 +6,11 @@ public interface IVehicle
     /// Vehicle's current state
     /// </summary>
     public bool IsAsynchronous { get; }
+    
+    /// <summary>
+    /// Need to reset postion in roadline
+    /// </summary>
+    public bool NeedClear { get; }
     /// <summary>
     /// Run task
     /// </summary>

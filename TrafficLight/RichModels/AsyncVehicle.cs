@@ -10,6 +10,9 @@ public class AsyncVehicle<T, TV>:IVehicle
     public bool IsAsynchronous => true;
 
     /// <inheritdoc />
+    public bool NeedClear { get; init; }
+
+    /// <inheritdoc />
     public void Run()
     {
         /*Callback(Parameter).ContinueWith(task =>
@@ -24,7 +27,7 @@ public class AsyncVehicle<T, TV>:IVehicle
             }
         });*/
 
-        var result = Callback(Parameter).Result;
+        var result = Callback(Parameter).ConfigureAwait(false).GetAwaiter().GetResult();
         TaskCompletionSource.TrySetResult(result);
     }
 }
